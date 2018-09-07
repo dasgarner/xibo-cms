@@ -238,10 +238,23 @@ else
             try {
                 $dbh = PDOConnect::init();
             
-                $sth = $dbh->prepare('DELETE FROM `stat` WHERE statDate < :maxage');
-                $sth->execute(array(
+                $sth = $dbh->prepare('DELETE FROM `stat` WHERE statDate < :maxage LIMIT 1000');
+
+                $rowsModified = 1;
+
+                while ($rowsModified > 0) {
+
+                    $sth->execute(array(
                         'maxage' => $maxage
                     ));
+
+                    $rowsModified = $sth->rowCount();
+
+                    if ($dbh->inTransaction())
+                        $dbh->commit();
+
+                    sleep(1);
+                }
 
                 print __('Done.');
             }
