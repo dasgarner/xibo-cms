@@ -80,7 +80,7 @@ class Actions extends Middleware
             $resource = $app->router->getCurrentRoute()->getPattern();
 
             // Only process notifications if we are a full request
-            if (!$app->request()->isAjax()) {
+            if (!$app->request()->isAjax() && !$app->public) {
                 try {
                     $app->user->routeAuthentication('/drawer');
 
