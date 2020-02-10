@@ -9,7 +9,7 @@
         <li class="divider"></li>
         <li><a class="XiboFormButton" href="{{ urlFor("user.preferences.form") }}" title="{% trans "Preferences" %}">{% trans "Preferences" %}</a></li>
         <li><a class="XiboFormButton" href="{{ urlFor("user.edit.profile.form") }}" title="{% trans "Edit Profile" %}">{% trans "Edit Profile" %}</a></li>
-        <li><a id="reshowWelcomeMenuItem" href="#">{% trans "Reshow welcome" %}</a></li>
+        <li><a id="reshowWelcomeMenuItem" href="{{ urlFor("welcome.view") }}">{% trans "Reshow welcome" %}</a></li>
         <li><a class="XiboHelpButton" href="{{ helpService.link() }}">{% trans "Help" %}</a></li>
         <li class="divider"></li>
         <li><a title="{% trans "Logout" %}" href="{{ logoutUrl }}">{% trans "Logout" %}</a></li>

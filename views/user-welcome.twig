@@ -17,15 +17,12 @@
     .tour .popover-title{
         background-color: #b2bfdc;
     }
-
 </style>
 
 <script type="text/javascript">
 
     {% set appName = theme.getThemeConfig("app_name") %}
     {% set horizontalNav = currentUser.getOptionValue("navigationMenuPosition", theme.getSetting("NAVIGATION_MENU_POSITION", "vertical")) == "horizontal" %}
-
-    var hasSeenNewUserWizard = {% if currentUser.userTypeId != 0 %}{{currentUser.newUserWizard}}{% else %}-1{% endif %};
     
     $(document).ready(function () {
         var tour, layoutDesignerTour, no_nav_template, start_template, next_template, final_template;
@@ -37,9 +34,6 @@
         // New wizard tour
         tour = window.tour = new Tour({
             debug: false,
-            onEnd: function () {
-                setNewUserWizardState();
-            },
             steps: [
                 { // 0
                     orphan: true,
@@ -439,14 +433,6 @@
             ]
         });
 
-        if (hasSeenNewUserWizard === 0) {
-            restartTour(tour);
-        }
-
-        $("#reshowWelcomeMenuItem").on("click", function() {
-            restartTour(tour, true);
-        });
-
         // Layout Designer tour
         layoutDesignerTour = window.layoutDesignerTour = new Tour({
             debug: false,
@@ -596,12 +582,10 @@
 
         delay = (delay === undefined) ? 500 : delay;
 
-        hasSeenNewUserWizard = -1;
         tour.end();
         setTimeout(function(){
             if(checkCallback()) {
-                hasSeenNewUserWizard = 0;
-                restartTour(tour, true);
+                restartTour(tour);
                 tour.goTo(step); //next step
             } else {
                 customTourWait(tour, step, checkCallback, delay);
@@ -610,45 +594,11 @@
     }
 
     // Restart tour and/or save to prefs
-    function restartTour(tour, saveToPrefs) {
-
-        saveToPrefs = (saveToPrefs === undefined) ? false : saveToPrefs;
-
-        if(saveToPrefs) {
-            setNewUserWizardState(false);
-        }
+    function restartTour(tour) {
 
         // Reshow the user welcome wizard
-            tour.init();
-            tour.restart();
-        }
-
-    function setNewUserWizardState(seen) {
-        
-        seen = (seen === undefined) ? true : seen;
-
-        // If var is invalid, skip set
-        if(hasSeenNewUserWizard == -1) {
-            return;
-        }
-
-        if(seen) {
-            // Set the new user wizard flag to 1
-            hasSeenNewUserWizard = 1;
-
-            $.ajax({
-                url: '{{ urlFor("welcome.wizard.seen") }}',
-                type: 'PUT'
-            });
-        } else {
-            // Set the new user wizard flag to 0
-            $.ajax({
-                url: '{{ urlFor("welcome.wizard.unseen") }}',
-                type: 'POST'
-            });
-
-            hasSeenNewUserWizard = 0;
-        }
+        tour.init();
+        tour.restart();
     }
 
 </script>

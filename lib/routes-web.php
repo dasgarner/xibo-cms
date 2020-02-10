@@ -38,6 +38,7 @@ $app->get('/', function () use ($app) {
 })->setName('home');
 
 // Dashboards
+$app->get('/welcome', '\Xibo\Controller\Help:welcome')->name('welcome.view');
 $app->get('/statusdashboard', '\Xibo\Controller\StatusDashboard:displayPage')->name('statusdashboard.view');
 $app->get('/statusdashboard/displays', '\Xibo\Controller\StatusDashboard:displays')->name('statusdashboard.displays');
 $app->get('/statusdashboard/displayGroups', '\Xibo\Controller\StatusDashboard:displayGroups')->name('statusdashboard.displayGroups');
@@ -179,8 +180,6 @@ $app->get('/display/form/licenceCheck/:id', '\Xibo\Controller\Display:checkLicen
 // user
 //
 $app->get('/user/view', '\Xibo\Controller\User:displayPage')->name('user.view');
-$app->post('/user/welcome', '\Xibo\Controller\User:userWelcomeSetUnseen')->name('welcome.wizard.unseen');
-$app->put('/user/welcome', '\Xibo\Controller\User:userWelcomeSetSeen')->name('welcome.wizard.seen');
 $app->get('/user/apps', '\Xibo\Controller\User:myApplications')->name('user.applications');
 $app->get('/user/form/profile', '\Xibo\Controller\User:editProfileForm')->name('user.edit.profile.form');
 $app->get('/user/page/password', '\Xibo\Controller\User:forceChangePasswordPage')->name('user.force.change.password.page');

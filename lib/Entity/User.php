@@ -1117,8 +1117,8 @@ class User implements \JsonSerializable
         if ($this->userTypeId == 1)
             return true;
 
-        // All users have access to the logout page
-        if ($route === '/logout')
+        // All users have access to the logout and welcome pages
+        if ($route === '/logout' || $route === '/welcome')
             return true;
 
         try {

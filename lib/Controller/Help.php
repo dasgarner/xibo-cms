@@ -57,6 +57,18 @@ class Help extends Base
     }
 
     /**
+     * Welcome Page
+     * @throws \Xibo\Exception\XiboException
+     */
+    public function welcome()
+    {
+        $this->getUser()->newUserWizard = 1;
+        $this->getUser()->save(['validate' => false]);
+
+        $this->getState()->template = 'user-welcome-page';
+    }
+
+    /**
      * Help Page
      */
     function displayPage()

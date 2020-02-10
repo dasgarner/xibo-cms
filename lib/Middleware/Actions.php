@@ -76,6 +76,9 @@ class Actions extends Middleware
             if (Environment::migrationPending())
                 return;
 
+            // What is our route?
+            $resource = $app->router->getCurrentRoute()->getPattern();
+
             // Only process notifications if we are a full request
             if (!$app->request()->isAjax()) {
                 try {
@@ -121,9 +124,6 @@ class Actions extends Middleware
                     // User notifications
                     $notifications = array_merge($notifications, $factory->getMine());
 
-                    // Get the current route pattern
-                    $resource = $app->router->getCurrentRoute()->getPattern();
-
                     // If we aren't already in a notification interrupt, then check to see if we should be
                     if ($resource != '/drawer/notification/interrupt/:id' && !$app->request()->isAjax()) {
                         foreach ($notifications as $notification) {
@@ -139,11 +139,16 @@ class Actions extends Middleware
                 } catch (AccessDeniedException $e) {
                     // Drawer not available
                 }
-            }
 
-            $resource = $app->router->getCurrentRoute()->getPattern();
-            if (!$app->request()->isAjax() && $app->user->isPasswordChangeRequired == 1 && $resource != '/user/page/password') {
-                $app->redirectTo('user.force.change.password.page');
+                // Do we need to show the user welcome?
+                if ($app->user->newUserWizard === 0 && $resource !== '/welcome') {
+                    $app->redirectTo('welcome.view');
+                }
+
+                // Password needs changing?
+                if ($app->user->isPasswordChangeRequired == 1 && $resource != '/user/page/password') {
+                    $app->redirectTo('user.force.change.password.page');
+                }
             }
         });
 
