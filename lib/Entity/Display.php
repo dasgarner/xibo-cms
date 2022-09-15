@@ -32,7 +32,6 @@ use Xibo\Factory\DisplayProfileFactory;
 use Xibo\Factory\FolderFactory;
 use Xibo\Factory\LayoutFactory;
 use Xibo\Helper\DateFormatHelper;
-use Xibo\Helper\Profiler;
 use Xibo\Service\ConfigServiceInterface;
 use Xibo\Service\LogServiceInterface;
 use Xibo\Storage\StorageServiceInterface;
@@ -690,8 +689,6 @@ class Display implements \JsonSerializable
             'checkDisplaySlotAvailability' => true
         ], $options);
 
-        $allowNotify = true;
-
         if ($options['validate']) {
             $this->validate();
         }
@@ -710,9 +707,6 @@ class Display implements \JsonSerializable
 
         if ($this->displayId == null || $this->displayId == 0) {
             $this->add();
-
-            // Never notify on add (there is little point, we've only just added).
-            $allowNotify = false;
         } else {
             $this->edit();
         }
@@ -723,22 +717,8 @@ class Display implements \JsonSerializable
 
         // Trigger an update of all dynamic DisplayGroups?
         if ($this->hasPropertyChanged('display') || $this->hasPropertyChanged('tags')) {
-            // TODO: Can we trigger a task to run which does this in the background?
-            Profiler::start('Display::save::dynamic', $this->getLog());
-            foreach ($this->displayGroupFactory->getByIsDynamic(1) as $group) {
-                $this->getDispatcher()->dispatch(new DisplayGroupLoadEvent($group), DisplayGroupLoadEvent::$NAME);
-                $group->load();
-                $group->save([
-                    'validate' => false,
-                    'saveGroup' => false,
-                    'saveTags' => false,
-                    'manageLinks' => false,
-                    'manageDisplayLinks' => true,
-                    'manageDynamicDisplayLinks' => true,
-                    'allowNotify' => $allowNotify
-                ]);
-            }
-            Profiler::end('Display::save::dynamic', $this->getLog());
+            // Background update.
+            $this->config->changeSetting('DYNAMIC_DISPLAY_GROUP_ASSESS', 1);
         }
     }
 
