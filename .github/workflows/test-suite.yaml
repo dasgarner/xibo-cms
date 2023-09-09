@@ -64,7 +64,7 @@ jobs:
           ls -al $GITHUB_WORKSPACE/cypress/results
       - name: Save Cypress test results as an artifact
         #if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: cypress-test-results
           path: $GITHUB_WORKSPACE/cypress/results/
