@@ -61,22 +61,10 @@ jobs:
       - name: Look see
         continue-on-error: true
         run: |
-          ls -al $GITHUB_WORKSPACE
-      - name: Look see 1
-        continue-on-error: true
-        run: |
-          ls -al $GITHUB_WORKSPACE/cypress
-      - name: Look see 2
-        continue-on-error: true
-        run: |          
-          docker run -t cms-cypress /bin/bash -c "ls -la /app/cypress"
-      - name: Look see 3
-        continue-on-error: true
-        run: |
           ls -al $GITHUB_WORKSPACE/cypress/results
       - name: Save Cypress test results as an artifact
         #if: failure()
         uses: actions/upload-artifact@v2
         with:
           name: cypress-test-results
-          path: $GITHUB_WORKSPACE/cypress/results
+          path: $GITHUB_WORKSPACE/cypress/results/
