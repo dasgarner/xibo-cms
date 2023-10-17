@@ -28,9 +28,15 @@ define('PROJECT_ROOT', realpath(__DIR__ . '/../..'));
 require PROJECT_ROOT . '/vendor/autoload.php';
 
 // RSA key
-$fp = fopen(PROJECT_ROOT . '/library/certs/private.key', 'r');
-$privateKey = openssl_get_privatekey(fread($fp, 8192));
-fclose($fp);
+const DECRYPT = false;
+
+if (DECRYPT) {
+    $fp = fopen(PROJECT_ROOT . '/library/certs/private.key', 'r');
+    $privateKey = openssl_get_privatekey(fread($fp, 8192));
+    fclose($fp);
+} else {
+    $privateKey = null;
+}
 
 // Sub
 $loop = React\EventLoop\Factory::create();
@@ -38,7 +44,7 @@ $loop = React\EventLoop\Factory::create();
 $context = new React\ZMQ\Context($loop);
 
 $sub = $context->getSocket(ZMQ::SOCKET_SUB);
-$sub->connect('tcp://xmr:9505');
+$sub->connect('tcp://host.docker.internal:9505');
 $sub->subscribe('H');
 $sub->subscribe('XMR_test_channel');
 
@@ -60,8 +66,12 @@ $sub->on('messages', function ($msg) use ($privateKey) {
         }
 
         // Decrypt
-        $output = null;
-        openssl_open(base64_decode($msg[2]), $output, base64_decode($msg[1]), $privateKey, 'RC4');
+        if (DECRYPT) {
+            $output = null;
+            openssl_open(base64_decode($msg[2]), $output, base64_decode($msg[1]), $privateKey, 'RC4');
+        } else {
+            $output = $msg[2] . ' / ' . $msg[1];
+        }
 
         echo '[' . date('Y-m-d H:i:s') . '] Received: ' . $output . PHP_EOL;
     } catch (InvalidArgumentException $e) {

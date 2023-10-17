@@ -12,13 +12,11 @@ services:
       MYSQL_DATABASE: "cms"
 
   xmr:
-    image: ghcr.io/xibosignage/xibo-xmr:latest
+    image: ghcr.io/xibosignage/xibo-xmr:dotnet
     ports:
     - "9505:9505"
     environment:
-      XMR_DEBUG: "true"
-      IPV6RESPSUPPORT: "false"
-      IPV6PUBSUPPORT: "false"
+      Logging__LogLevel__Default: "Debug"
 
   web:
     build:
