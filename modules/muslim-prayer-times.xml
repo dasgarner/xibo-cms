@@ -1,0 +1,121 @@
+<!--
+  ~ Copyright (C) 2023 Xibo Signage Ltd
+  ~
+  ~ Xibo - Digital Signage - https://xibosignage.com
+  ~
+  ~ This file is part of Xibo.
+  ~
+  ~ Xibo is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ any later version.
+  ~
+  ~ Xibo is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with Xibo.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<module>
+    <id>core-muslim-prayer-times</id>
+    <name>Muslim Prayer Times</name>
+    <author>Core</author>
+    <description>A module for displaying a calendar based on Muslim Prayer Times</description>
+    <icon>fa fa-calendar-alt</icon>
+    <class>Xibo\Widget\MuslimPrayerTimesProvider</class>
+    <type>muslim-prayer-times</type>
+    <dataType>event</dataType>
+    <dataCacheKey>%useDisplayLocation%_%latitude%_%longitude%</dataCacheKey>
+    <schemaVersion>1</schemaVersion>
+    <assignable>1</assignable>
+    <regionSpecific>1</regionSpecific>
+    <renderAs>html</renderAs>
+    <defaultDuration>60</defaultDuration>
+    <properties>
+        <property id="startIntervalFrom" type="dropdown" mode="single">
+            <title>Events from the start of the</title>
+            <helpText>When should events be returned from?</helpText>
+            <options>
+                <option name="day">Day</option>
+                <option name="week">Week</option>
+                <option name="month">Month</option>
+            </options>
+            <default>day</default>
+        </property>
+        <property id="futureEvents" type="checkbox">
+            <title>Future only?</title>
+            <helpText>Only show future events?</helpText>
+            <default>0</default>
+        </property>
+    </properties>
+    <onDataError><![CDATA[
+    if (typeof httpStatus === 'undefined' || typeof response === 'undefined') {
+        return false;
+    }
+
+    var hasSucceed = response.hasOwnProperty('success') && response.success === true;
+
+    if (!hasSucceed) {
+        return false;
+    }
+]]></onDataError>
+    <onParseData><![CDATA[
+// item - element to be parsed
+// properties - object containing the values to be evaluated/used
+var now = moment();
+var startDate = moment(item.startDate);
+var endDate = moment(item.endDate);
+
+if (endDate.isAfter(now)) {
+    if (moment(item.startDate).isBefore(now)) {
+        item.currentEvent = true;
+    } else {
+        item.currentEvent = false;
+    }
+}
+
+// Return element
+if (properties.futureEvents == 1 && startDate.isBefore(now)) {
+    return null;
+}
+
+return item;
+    ]]></onParseData>
+    <onVisible><![CDATA[
+// Start effects for this widget
+$(target).xiboLayoutAnimate(properties);
+    ]]></onVisible>
+    <sampleData><![CDATA[
+[{
+    "summary": "Sample Event 1",
+    "description": "This event will start an hour after the current date and time and ends 12 hours after that.",
+    "location": null,
+    "startDate": "%+1h%",
+    "endDate": "%+12h%"
+},
+{
+    "summary": "Sample Event 2",
+    "description": "This event will start right away on the current date and time and ends after a day.",
+    "location": null,
+    "startDate": "%+0d%",
+    "endDate": "%+1d%"
+},
+{
+    "summary": "Sample Event 3",
+    "description": "This event will start 2 hours after the current date and time and ends 4 hours after that.",
+    "location": null,
+    "startDate": "%+2h%",
+    "endDate": "%+4h%"
+},
+{
+    "summary": "Sample Event 4",
+    "description": "This event will start 5 minutes after the current date and time and ends 30 minutes after that.",
+    "location": null,
+    "startDate": "%+5m%",
+    "endDate": "%+30m%"
+}]
+]]></sampleData>
+    <preview></preview>
+</module>
