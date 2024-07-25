@@ -363,7 +363,7 @@ class DataSet implements \JsonSerializable
      * @return array
      * @throws NotFoundException
      */
-    public function getData($filterBy = [], $options = [])
+    public function getData($filterBy = [], $options = [], $extraParams = [])
     {
         $this->touchLastAccessed();
 
@@ -378,8 +378,8 @@ class DataSet implements \JsonSerializable
             'requireTotal' => true
         ], $options);
 
-        // Params
-        $params = [];
+        // Params (start from extraParams supplied)
+        $params = $extraParams;
 
         // Sanitize the filter options provided
         // Get the Latitude and Longitude ( might be used in a formula )
@@ -943,19 +943,23 @@ class DataSet implements \JsonSerializable
     {
         $this->getLog()->debug('Adding row ' . var_export($row, true));
 
-        // Update the last edit date on this dataSet
-        $this->lastDataEdit = time();
-
         // Build a query to insert
+        $params = [];
         $keys = array_keys($row);
-        $keys[] = 'id';
 
-        $values = array_values($row);
-        $values[] = NULL;
+        $sql = 'INSERT INTO `dataset_' . $this->dataSetId
+            . '` (`' . implode('`, `', $keys) . '`) VALUES (';
 
-        $sql = 'INSERT INTO `dataset_' . $this->dataSetId . '` (`' . implode('`, `', $keys) . '`) VALUES (' . implode(',', array_fill(0, count($values), '?')) . ')';
+        $i = 0;
+        foreach ($row as $value) {
+            $i++;
+            $sql .= ':value' . $i . ',';
+            $params['value' . $i] = $value;
+        }
+        $sql = rtrim($sql, ',');
+        $sql .= ')';
 
-        return $this->getStore()->insert($sql, $values);
+        return $this->getStore()->insert($sql, $params);
     }
 
     /**

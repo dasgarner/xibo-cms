@@ -110,11 +110,15 @@ class DataSetData extends Base
 
         // Filter criteria
         $filter = '';
+        $params = [];
+        $i = 0;
         foreach ($dataSet->getColumn() as $column) {
             /* @var \Xibo\Entity\DataSetColumn $column */
             if ($column->dataSetColumnTypeId == 1) {
+                $i++;
                 if ($this->getSanitizer()->getString($column->heading) != null) {
-                    $filter .= 'AND ' . $column->heading . ' LIKE \'%' . $this->getSanitizer()->getString($column->heading) . '%\' ';
+                    $filter .= 'AND `' . $column->heading . '` LIKE :heading_' . $i . ' ';
+                    $params['heading_' . $i] = '%' . $this->getSanitizer()->getString($column->heading) . '%';
                 }
             }
         }
@@ -129,7 +133,7 @@ class DataSetData extends Base
             'start' => $filter['start'],
             'size' => $filter['length'],
             'filter' => $filter['filter']
-        ]));
+        ], [], $params));
 
         // Output the count of records for paging purposes
         if ($dataSet->countLast() != 0)
